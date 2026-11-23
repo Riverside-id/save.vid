@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { coverUrl, listMedia, parseItemFromHtml, TikTokError } from "@/lib/server/tiktok";
+import { coverUrl, listMedia, pageUrlFor, parseItemFromHtml, TikTokError } from "@/lib/server/tiktok";
 import { SLIDESHOW_ITEM, tiktokPage, VIDEO_ITEM } from "../fixtures/tiktok";
 
 describe("TikTok parsing", () => {
@@ -29,6 +29,11 @@ describe("TikTok parsing", () => {
   it("falls back to playAddr when bitrateInfo is missing", () => {
     const item = { ...VIDEO_ITEM, video: { ...VIDEO_ITEM.video, bitrateInfo: [] } };
     expect(listMedia(item)[0]?.url).toBe("https://v16-webapp-prime.tiktok.com/video/play/");
+  });
+
+  it("reads photo posts through the /video/ page (photo pages carry no data)", () => {
+    expect(pageUrlFor("https://www.tiktok.com/@a.b/photo/7145516894085451054")).toBe("https://www.tiktok.com/@a.b/video/7145516894085451054");
+    expect(pageUrlFor("https://www.tiktok.com/@a/video/7047596209028074758")).toBe("https://www.tiktok.com/@a/video/7047596209028074758");
   });
 
   it("lists every slideshow image at full size", () => {

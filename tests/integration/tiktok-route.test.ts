@@ -38,11 +38,13 @@ describe("POST /api/tiktok", () => {
   });
 
   it("resolves a photo slideshow into full-size images", async () => {
-    mockFetch([["www.tiktok.com/@photographer/photo/", () => new Response(tiktokPage(SLIDESHOW_ITEM))]]);
+    const fetchMock = mockFetch([["www.tiktok.com/@photographer/video/7300000000000000000", () => new Response(tiktokPage(SLIDESHOW_ITEM))]]);
     const body = (await (await post("https://www.tiktok.com/@photographer/photo/7300000000000000000")).json()) as ResolveResponse;
     if (!body.ok) throw new Error("expected success");
     expect(body.postType).toBe("carousel");
     expect(body.items.map((i) => i.variants[0]!.label)).toEqual(["JPG · 1080×1440", "WEBP · 1080×1350"]);
+    expect(body.sourceUrl).toBe("https://www.tiktok.com/@photographer/photo/7300000000000000000");
+    expect(String(fetchMock.mock.calls[0]![0])).toContain("/video/7300000000000000000");
   });
 
   it("expands short links only to TikTok post URLs", async () => {

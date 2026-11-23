@@ -184,12 +184,22 @@ export function parseItemFromHtml(html: string): TtItem {
   return item;
 }
 
+/**
+ * The page we actually read for a post. TikTok's `/photo/<id>` pages are rendered
+ * in the browser and carry no post data, while `/video/<id>` for the same id does
+ * (verified with real slideshows) — so photo posts are read via the video path.
+ */
+export function pageUrlFor(canonicalPostUrl: string): string {
+  return canonicalPostUrl.replace(/^(https:\/\/www\.tiktok\.com\/@[^/]+)\/photo\/(\d+)$/, "$1/video/$2");
+}
+
 /** Reads the post page in a fresh anonymous session (cached for 60 s per instance). */
 export async function loadTikTokSession(canonicalPostUrl: string, opts: { fresh?: boolean } = {}): Promise<TtSession> {
   const cached = sessions.get(canonicalPostUrl);
   if (!opts.fresh && cached && Date.now() - cached.fetchedAt < SESSION_TTL_MS) return cached;
 
-  const res = await getWithTimeout(canonicalPostUrl, { "User-Agent": USER_AGENT, Accept: "text/html", "Accept-Language": "en-US,en;q=0.8" });
+  const pageUrl = pageUrlFor(canonicalPostUrl);
+  const res = await getWithTimeout(pageUrl, { "User-Agent": USER_AGENT, Accept: "text/html", "Accept-Language": "en-US,en;q=0.8" });
   if (res.status >= 300 && res.status < 400) {
     await res.body?.cancel().catch(() => {});
     const loc = res.headers.get("location") ?? "";
@@ -201,7 +211,7 @@ export async function loadTikTokSession(canonicalPostUrl: string, opts: { fresh?
   if (!res.ok) throw new TikTokError("UPSTREAM_ERROR", `TikTok answered with HTTP ${res.status}.`);
 
   const item = parseItemFromHtml(await readCapped(res));
-  const session: TtSession = { pageUrl: canonicalPostUrl, cookie: collectCookies(res), item, fetchedAt: Date.now() };
+  const session: TtSession = { pageUrl, cookie: collectCookies(res), item, fetchedAt: Date.now() };
   if (sessions.size > 200) sessions.clear();
   sessions.set(canonicalPostUrl, session);
   return session;

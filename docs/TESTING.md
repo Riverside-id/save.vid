@@ -23,7 +23,7 @@ Dijalankan dari mesin developer (IP residensial) terhadap postingan publik. **Be
 | Carousel Instagram (5 foto) + ZIP | ✅ ZIP berisi 5 JPG 1080×1080 |
 | Konversi PNG di browser | ✅ PNG valid 1080×1350 |
 | Video TikTok | ✅ MP4 H.264 576×1024 + audio AAC, tanpa overlay watermark TikTok (dibandingkan frame-per-frame dengan versi `downloadAddr`) |
-| Slideshow foto TikTok | ⚠️ Diimplementasikan & diuji dengan fixture, **belum** diuji dengan postingan nyata |
+| Slideshow foto TikTok | ✅ 6 foto ukuran asli (mis. 1082×1134, ± 2,3 MB/foto) + ZIP 6 file; diperiksa visual: tanpa logo/username TikTok. Catatan: halaman `/photo/<id>` tidak memuat data, jadi dibaca lewat `/video/<id>` |
 | Range request (seek video) | ✅ 206 Partial Content |
 | Token dimodifikasi / hotlink lintas situs / Origin asing | ✅ ditolak (400 / 403 / 403) |
 

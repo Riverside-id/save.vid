@@ -20,5 +20,5 @@ export const SUPPORT_MATRIX: SupportRow[] = [
   { platform: "Instagram", feature: "Photos (JPG / PNG)", status: "working", detail: "Full-size JPG (e.g. 1080×1350). PNG is converted in your browser." },
   { platform: "Instagram", feature: "Carousels + ZIP", status: "working", detail: "Every photo/video of the post, or all of them in one streamed ZIP." },
   { platform: "TikTok", feature: "Videos", status: "working", detail: "Watermark-free source — no TikTok overlay (checked frame by frame)." },
-  { platform: "TikTok", feature: "Photo slideshows", status: "untested", detail: "Implemented, not yet verified with a real public slideshow." },
+  { platform: "TikTok", feature: "Photo slideshows", status: "working", detail: "Every photo at original size, no TikTok watermark; all photos as one ZIP." },
 ];

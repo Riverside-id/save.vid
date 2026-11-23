@@ -14,7 +14,7 @@ Tema Black & Pink · Next.js (App Router) + TypeScript + Tailwind CSS · Python 
 | Instagram | Foto | ✅ JPG ukuran penuh; PNG (dikonversi di browser) |
 | Instagram | Carousel + ZIP | ✅ |
 | TikTok | Video | ✅ sumber tanpa watermark (tanpa overlay TikTok) |
-| TikTok | Slideshow foto | ⚠️ diimplementasikan, belum diuji dengan postingan nyata |
+| TikTok | Slideshow foto | ✅ semua foto ukuran asli, tanpa watermark; bisa ZIP |
 
 Detail & bukti: [`docs/TESTING.md`](docs/TESTING.md). Arsitektur & alasan teknis: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
