@@ -153,3 +153,79 @@ def test_service_dispatches_pinterest(monkeypatch):
     status, body, _ = service.resolve("https://id.pinterest.com/pin/slug--567805465533794868/?x=1", "7.7.7.7")
     assert status == 200 and body["platform"] == "pinterest"
     assert calls == [("https://www.pinterest.com/pin/567805465533794868/", "Pinterest")]
+
+
+# ── Video pins that Pinterest only lists as HLS ─────────────────────────────
+from _lib.pinterest import derived_mp4_candidates, find_video, probe_mp4  # noqa: E402
+
+HLS_ONLY = {
+    "duration": 20.665,
+    "thumbnails": thumbs(1080, 1920),
+    "formats": [
+        {"format_id": "V_HLSV3_MOBILE-audio", "protocol": "m3u8_native", "url": f"{VID}/iht/hls/a5/df/4e/a5df4e9cc113d46906bc5af85c2b536c_audio.m3u8",
+         "manifest_url": "https://v1.pinimg.com/videos/iht/hls/a5/df/4e/a5df4e9cc113d46906bc5af85c2b536c.m3u8"},
+        {"format_id": "V_HLSV3_MOBILE-1374", "protocol": "m3u8_native", "width": 640, "height": 1136,
+         "url": "https://v1.pinimg.com/videos/iht/hls/a5/df/4e/a5df4e9cc113d46906bc5af85c2b536c_640w.m3u8"},
+    ],
+}
+DERIVED = "https://v1.pinimg.com/videos/mc/720p/a5/df/4e/a5df4e9cc113d46906bc5af85c2b536c.mp4"
+
+
+def test_derives_mp4_from_hls_hash_path():
+    assert derived_mp4_candidates(HLS_ONLY) == [DERIVED, DERIVED.replace("/mc/", "/iht/")]
+    assert derived_mp4_candidates({"formats": [{"url": "https://evil.example/videos/mc/hls/a5/df/4e/" + "a" * 32 + ".m3u8"}]}) == []
+
+
+def test_hls_only_pin_becomes_a_verified_video():
+    probed = []
+    p = parse_url("https://tr.pinterest.com/pin/breakfast-recipes--578642252144694181/")
+    body = normalize(HLS_ONLY, p, secret=SECRET, ttl=60, extractor_version="t", probe=lambda u: probed.append(u) or True)
+    item = body["items"][0]
+    assert body["postType"] == "video" and body["notice"] is None
+    assert item["variants"][0]["label"] == "MP4 · Full video" and (item["width"], item["height"]) == (1080, 1920)
+    assert payload(item["variants"][0]["token"])["u"] == DERIVED
+    assert probed == [DERIVED]
+
+
+def test_unverified_mp4_is_never_offered():
+    p = parse_url("https://tr.pinterest.com/pin/578642252144694181/")
+    body = normalize(HLS_ONLY, p, secret=SECRET, ttl=60, extractor_version="t", probe=lambda u: False)
+    assert body["postType"] == "image" and "only streams it" in body["notice"]
+    assert body["items"][0]["variants"][0]["note"] == "Cover image of the video pin."
+
+
+def test_listed_mp4_needs_no_probe():
+    info = {"thumbnails": thumbs(), "formats": [{"format_id": "V_720P", "url": f"{VID}/mc/720p/x.mp4", "protocol": "https", "width": 720, "height": 1280}]}
+    assert find_video(info, probe=lambda u: pytest.fail("should not probe"))["format_id"] == "V_720P"
+
+
+class ProbeOpener:
+    def __init__(self, status=206, ctype="video/mp4", exc=None):
+        self.status, self.ctype, self.exc, self.requests = status, ctype, exc, []
+
+    def open(self, req, timeout=None):
+        self.requests.append(req)
+        if self.exc:
+            raise self.exc
+        outer = self
+
+        class Resp(io.BytesIO):
+            status = outer.status
+            headers = {"Content-Type": outer.ctype}
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *a):
+                return False
+
+        return Resp(b"x" * 1024)
+
+
+def test_probe_requires_mp4_and_reads_only_a_range():
+    op = ProbeOpener()
+    assert probe_mp4(DERIVED, opener=op) is True
+    assert op.requests[0].get_header("Range") == "bytes=0-1023"
+    assert probe_mp4(DERIVED, opener=ProbeOpener(ctype="text/html")) is False
+    assert probe_mp4(DERIVED, opener=ProbeOpener(exc=urllib.error.HTTPError(DERIVED, 403, "Forbidden", {}, None))) is False
+    assert probe_mp4("https://evil.example/x.mp4", opener=ProbeOpener()) is False

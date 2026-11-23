@@ -40,6 +40,7 @@ Normalisasi (`api/_lib/instagram.py`) hanya menawarkan yang benar-benar ada:
 
 - yt-dlp membaca pin lewat endpoint web Pinterest untuk pengunjung tanpa login (`unauth_react_main_pin`) — tanpa cookie, login, atau impersonasi. Diuji nyata dengan pin publik dari berbagai situs negara (termasuk `id.pinterest.com`).
 - Pin video: satu MP4 progresif terbaik (audio terverifikasi); HLS dilewati; di antara resolusi yang sama, file asli tanpa akhiran tier `_tN` dipilih.
+- Pin video yang oleh Pinterest hanya dicantumkan sebagai HLS: MP4 progresif dengan hash path yang sama (`/videos/mc/720p/aa/bb/cc/<hash>.mp4`) dicari di CDN Pinterest dan **hanya ditawarkan setelah probe** (Range 1 KB, harus 200/206 + `video/mp4`). Jika tidak ada, pengguna mendapat pesan jujur dan hanya cover image — tidak pernah tombol palsu.
 - Pin gambar: file `originals` (unggahan asli, ukuran penuh). Thumbnail berukuran kotak tetap seperti `600x315` (crop) tidak pernah dipilih.
 - Short link `pin.it` diekspansi hop demi hop (`api/_lib/redirects.py`): setiap host divalidasi allowlist + IP publik, hasil akhir harus URL pin yang valid.
 - Pin yang hanya menyematkan video YouTube/Vimeo ditolak — yt-dlp dibatasi ke ekstraktor Pinterest saja.
