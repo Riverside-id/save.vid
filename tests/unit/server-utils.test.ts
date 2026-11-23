@@ -12,6 +12,8 @@ describe("media host allowlist", () => {
     "https://scontent.xx.fbcdn.net/v/x.jpg",
     "https://p16-common-sign.tiktokcdn.com/obj/x.jpg",
     "https://v16-webapp-prime.tiktok.com/video/tos/x/",
+    "https://v19-webapp-prime.us.tiktok.com/video/tos/x/",
+    "https://www.tiktok.com/aweme/v1/play/?video_id=1",
   ])("allows %s", (u) => expect(isAllowedMediaUrl(u)).toBe(true));
 
   it.each([
@@ -20,6 +22,8 @@ describe("media host allowlist", () => {
     "https://evilcdninstagram.com/x.mp4",
     "https://scontent.cdninstagram.com.evil.example/x.mp4",
     "https://www.tiktok.com/@a/video/1",
+    "https://www.tiktok.com/aweme/v1/other/",
+    "https://v16.evil.example.tiktok.com.attacker.net/x",
     "https://u:p@scontent.cdninstagram.com/x",
     "https://scontent.cdninstagram.com:8443/x",
     "https://169.254.169.254/latest/meta-data",

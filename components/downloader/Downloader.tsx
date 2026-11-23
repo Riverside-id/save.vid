@@ -1,10 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { resolveUrl, type ClientErrorCode } from "@/lib/api-client";
 import type { Platform, ResolveSuccess } from "@/lib/types";
-import { checkUrl, detectPlatform } from "@/lib/url";
+import { checkUrl, detectLink } from "@/lib/url";
 import { ErrorState } from "./ErrorState";
 import { LoadingState } from "./LoadingState";
 import { PlatformTabs } from "./PlatformTabs";
@@ -31,12 +31,16 @@ export function Downloader() {
 
   useEffect(() => () => abortRef.current?.abort(), []);
 
+  // Live detection: which platform the link belongs to and what kind of post it is.
+  const detection = useMemo(() => detectLink(url), [url]);
+
   const handleChange = useCallback(
     (value: string) => {
       setUrl(value);
       setInlineError(null);
-      const detected = detectPlatform(value);
-      if (detected && detected !== platform) setPlatform(detected);
+      const d = detectLink(value);
+      // Follow the link: switch the platform tab automatically.
+      if ((d.state === "ready" || d.state === "partial") && d.platform !== platform) setPlatform(d.platform);
     },
     [platform],
   );
@@ -80,8 +84,9 @@ export function Downloader() {
         onChange={handleChange}
         onSubmit={submit}
         loading={state.status === "loading"}
-        hint={inlineError ?? HINTS[platform]}
-        hintTone={inlineError ? "error" : "muted"}
+        detection={detection}
+        hint={HINTS[platform]}
+        error={inlineError}
       />
       {state.status === "loading" ? <LoadingState platform={state.platform} /> : null}
       {state.status === "error" ? (

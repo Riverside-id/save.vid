@@ -11,6 +11,21 @@ describe("TikTok parsing", () => {
     expect(JSON.stringify(media)).not.toContain("hevc");
   });
 
+  it("skips non-allowlisted hosts and prefers CDN hosts over the play endpoint", () => {
+    const withHosts = (urls: string[]) => ({
+      ...VIDEO_ITEM,
+      video: { ...VIDEO_ITEM.video, playAddr: undefined, bitrateInfo: [{ CodecType: "h264", PlayAddr: { DataSize: 10, Width: 576, Height: 1024, UrlList: urls } }] },
+    });
+    expect(listMedia(withHosts(["https://www.tiktok.com/aweme/v1/play/?video_id=1", "https://v19-webapp-prime.us.tiktok.com/v/"]))[0]?.url).toBe(
+      "https://v19-webapp-prime.us.tiktok.com/v/",
+    );
+    expect(listMedia(withHosts(["https://evil.example/v.mp4", "https://www.tiktok.com/aweme/v1/play/?video_id=1"]))[0]?.url).toBe(
+      "https://www.tiktok.com/aweme/v1/play/?video_id=1",
+    );
+    const none = { ...withHosts(["https://evil.example/v.mp4"]), video: { ...withHosts(["https://evil.example/v.mp4"]).video, playAddr: "https://evil.example/p" } };
+    expect(listMedia(none)).toEqual([]);
+  });
+
   it("falls back to playAddr when bitrateInfo is missing", () => {
     const item = { ...VIDEO_ITEM, video: { ...VIDEO_ITEM.video, bitrateInfo: [] } };
     expect(listMedia(item)[0]?.url).toBe("https://v16-webapp-prime.tiktok.com/video/play/");

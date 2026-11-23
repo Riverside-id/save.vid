@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { checkUrl, detectPlatform } from "@/lib/url";
+import { checkUrl, detectLink, detectPlatform } from "@/lib/url";
 
 describe("checkUrl", () => {
   it.each([
@@ -43,5 +43,28 @@ describe("checkUrl", () => {
     expect(detectPlatform("https://www.tiktok.com/@a/video/1234567")).toBe("tiktok");
     expect(detectPlatform("instagram.com/p/x")).toBe("instagram");
     expect(detectPlatform("https://example.com")).toBeNull();
+  });
+});
+
+describe("detectLink (live input detection)", () => {
+  it.each([
+    ["https://www.instagram.com/reel/Chunk8-jurw/?igsh=1", "instagram", "reel", "Instagram Reel"],
+    ["instagram.com/p/BQ0eAlwhDrw", "instagram", "post", "Instagram post"],
+    ["https://www.instagram.com/tv/BkfuX9UB-eK/", "instagram", "video", "Instagram video"],
+    ["https://www.tiktok.com/@a/video/7047596209028074758", "tiktok", "video", "TikTok video"],
+    ["https://www.tiktok.com/@a/photo/7300000000000000000", "tiktok", "photo", "TikTok photo post"],
+    ["https://vt.tiktok.com/ZSabc123/", "tiktok", "short-link", "TikTok short link"],
+  ])("recognises %s", (input, platform, type, label) => {
+    expect(detectLink(input)).toMatchObject({ state: "ready", platform, type, label });
+  });
+
+  it("flags the platform while the link is still incomplete", () => {
+    expect(detectLink("https://www.instagram.com/someone/")).toMatchObject({ state: "partial", platform: "instagram" });
+    expect(detectLink("tiktok.com/@creator")).toMatchObject({ state: "partial", platform: "tiktok" });
+  });
+
+  it("handles empty and foreign input", () => {
+    expect(detectLink("  ")).toEqual({ state: "empty" });
+    expect(detectLink("https://youtube.com/watch?v=x").state).toBe("unknown");
   });
 });

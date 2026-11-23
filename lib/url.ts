@@ -24,8 +24,11 @@ const IG_POST_RE = new RegExp(`^/(?:[A-Za-z0-9._]{1,30}/)?(p|reel|reels|tv)/(${I
 const TT_ITEM_RE = /^\/@([A-Za-z0-9._-]{1,64})\/(video|photo)\/(\d{6,25})\/?$/;
 const TT_SHORT_RE = /^\/(?:t\/)?([A-Za-z0-9]{5,20})\/?$/;
 
+/** What the link points to, as far as the URL alone can tell. */
+export type LinkType = "reel" | "post" | "video" | "photo" | "short-link";
+
 export type UrlCheck =
-  | { ok: true; platform: Platform; kind: "post" | "short-link"; canonical: string }
+  | { ok: true; platform: Platform; kind: "post" | "short-link"; type: LinkType; canonical: string }
   | { ok: false; reason: "empty" | "too-long" | "invalid" | "unsupported-host" | "unsupported-path"; message: string };
 
 export function detectPlatform(input: string): Platform | null {
@@ -74,17 +77,24 @@ export function checkUrl(input: string): UrlCheck {
         message: "Use a link to a single Instagram post, reel or video. Profiles and stories are not supported.",
       };
     }
-    const type = m[1] === "reels" ? "reel" : (m[1] as string);
-    return { ok: true, platform: "instagram", kind: "post", canonical: `https://www.instagram.com/${type}/${m[2]}/` };
+    const segment = m[1] === "reels" ? "reel" : (m[1] as string);
+    const type: LinkType = segment === "reel" ? "reel" : segment === "tv" ? "video" : "post";
+    return { ok: true, platform: "instagram", kind: "post", type, canonical: `https://www.instagram.com/${segment}/${m[2]}/` };
   }
 
   if (TIKTOK_HOSTS.has(host)) {
     const m = TT_ITEM_RE.exec(path);
     if (m) {
-      return { ok: true, platform: "tiktok", kind: "post", canonical: `https://www.tiktok.com/@${m[1]}/${m[2]}/${m[3]}` };
+      return {
+        ok: true,
+        platform: "tiktok",
+        kind: "post",
+        type: m[2] === "photo" ? "photo" : "video",
+        canonical: `https://www.tiktok.com/@${m[1]}/${m[2]}/${m[3]}`,
+      };
     }
     const s = /^\/t\/([A-Za-z0-9]{5,20})\/?$/.exec(path);
-    if (s) return { ok: true, platform: "tiktok", kind: "short-link", canonical: `https://www.tiktok.com/t/${s[1]}/` };
+    if (s) return { ok: true, platform: "tiktok", kind: "short-link", type: "short-link", canonical: `https://www.tiktok.com/t/${s[1]}/` };
     return {
       ok: false,
       reason: "unsupported-path",
@@ -94,9 +104,34 @@ export function checkUrl(input: string): UrlCheck {
 
   if (TIKTOK_SHORT_HOSTS.has(host)) {
     const s = TT_SHORT_RE.exec(path);
-    if (s) return { ok: true, platform: "tiktok", kind: "short-link", canonical: `https://${host}/${s[1]}/` };
+    if (s) return { ok: true, platform: "tiktok", kind: "short-link", type: "short-link", canonical: `https://${host}/${s[1]}/` };
     return { ok: false, reason: "unsupported-path", message: "That TikTok short link looks incomplete." };
   }
 
   return { ok: false, reason: "unsupported-host", message: "Only instagram.com and tiktok.com links are supported." };
+}
+
+const LINK_LABEL: Record<Platform, Record<LinkType, string>> = {
+  instagram: { reel: "Instagram Reel", post: "Instagram post", video: "Instagram video", photo: "Instagram photo", "short-link": "Instagram link" },
+  tiktok: { reel: "TikTok video", post: "TikTok post", video: "TikTok video", photo: "TikTok photo post", "short-link": "TikTok short link" },
+};
+
+export type LinkDetection =
+  | { state: "empty" }
+  /** Not an Instagram/TikTok link (or not a link at all). */
+  | { state: "unknown"; message: string }
+  /** Right platform, but not (yet) a link to a single post — e.g. still typing, or a profile URL. */
+  | { state: "partial"; platform: Platform; message: string }
+  | { state: "ready"; platform: Platform; type: LinkType; label: string; canonical: string };
+
+/** Live detection for the input field: which platform, and what kind of link. */
+export function detectLink(input: string): LinkDetection {
+  if (!input.trim()) return { state: "empty" };
+  const check = checkUrl(input);
+  if (check.ok) {
+    return { state: "ready", platform: check.platform, type: check.type, label: LINK_LABEL[check.platform][check.type], canonical: check.canonical };
+  }
+  const platform = detectPlatform(input);
+  if (platform) return { state: "partial", platform, message: check.message };
+  return { state: "unknown", message: check.message };
 }

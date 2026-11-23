@@ -52,7 +52,16 @@ export async function fetchUpstream(
   let current = url;
 
   for (let hop = 0; hop <= maxRedirects; hop++) {
-    if (!isAllowedMediaUrl(current)) throw new UpstreamError(502, "DISALLOWED_HOST", "Media host is not allowed.");
+    if (!isAllowedMediaUrl(current)) {
+      let host = "invalid";
+      try {
+        host = new URL(current).hostname;
+      } catch {
+        /* keep "invalid" */
+      }
+      console.warn(`[upstream] blocked media host: ${host}`);
+      throw new UpstreamError(502, "DISALLOWED_HOST", "Media host is not allowed.");
+    }
 
     const headerTimeout = new AbortController();
     const timer = setTimeout(() => headerTimeout.abort(new Error("upstream timeout")), timeoutMs);

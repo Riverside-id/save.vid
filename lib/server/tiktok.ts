@@ -1,4 +1,5 @@
 import { checkUrl } from "@/lib/url";
+import { isAllowedMediaUrl } from "./allowlist";
 
 /**
  * TikTok adapter (server-only).
@@ -227,9 +228,20 @@ export function listMedia(item: TtItem): TtMedia[] {
   const h264 = (v.bitrateInfo ?? [])
     .filter((b) => (b.CodecType ?? "").toLowerCase().startsWith("h264") && b.PlayAddr?.UrlList?.length)
     .sort((a, b) => (b.PlayAddr?.DataSize ?? 0) - (a.PlayAddr?.DataSize ?? 0));
-  const best = h264[0];
-  const url = best?.PlayAddr?.UrlList?.find((u) => u.startsWith("https://")) ?? (v.playAddr?.startsWith("https://") ? v.playAddr : undefined);
-  if (!url) return [];
+  // Candidate URLs in preference order: CDN hosts of the best H.264 rendition first,
+  // then TikTok's play endpoint, then other renditions, then playAddr. Never downloadAddr.
+  const candidates: Array<{ url: string; b: TtBitrate | undefined }> = [];
+  for (const b of h264) for (const u of b.PlayAddr?.UrlList ?? []) candidates.push({ url: u, b });
+  if (v.playAddr) candidates.push({ url: v.playAddr, b: undefined });
+  const allowed = candidates.filter((c) => typeof c.url === "string" && isAllowedMediaUrl(c.url));
+  const pick = allowed.find((c) => !c.url.includes("://www.tiktok.com/")) ?? allowed[0];
+  if (!pick) {
+    const hosts = [...new Set(candidates.map((c) => safeHost(c.url)))].join(", ");
+    console.warn(`[tiktok] no allowlisted video URL; candidate hosts: ${hosts || "none"}`);
+    return [];
+  }
+  const best = pick.b ?? h264[0];
+  const url = pick.url;
   return [
     {
       key: "video",
@@ -242,6 +254,14 @@ export function listMedia(item: TtItem): TtMedia[] {
       mime: "video/mp4",
     },
   ];
+}
+
+function safeHost(u: unknown): string {
+  try {
+    return new URL(String(u)).hostname;
+  } catch {
+    return "invalid";
+  }
 }
 
 export function coverUrl(item: TtItem): string | null {
