@@ -21,6 +21,7 @@ export function serverLimits() {
     maxZipItems: int("MAX_ZIP_ITEMS", 20, 1, 100),
     mediaPerMinute: int("RATE_LIMIT_MEDIA_PER_MIN", 120, 1, 6000),
     zipPerMinute: int("RATE_LIMIT_ZIP_PER_MIN", 6, 1, 600),
+    audioPerMinute: int("RATE_LIMIT_AUDIO_PER_MIN", 10, 1, 600),
     upstashUrl: (process.env.UPSTASH_REDIS_REST_URL ?? "").trim().replace(/\/+$/, ""),
     upstashToken: (process.env.UPSTASH_REDIS_REST_TOKEN ?? "").trim(),
   };

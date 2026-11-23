@@ -1,11 +1,11 @@
-import { Eye, FolderDown, Gauge, Layers, ShieldCheck, Sparkles } from "lucide-react";
+import { AudioLines, Eye, FolderDown, Gauge, ShieldCheck, Sparkles } from "lucide-react";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 
 const FEATURES = [
   {
     icon: Sparkles,
     title: "Original source files",
-    body: "We hand you the file the platform serves — no re-encoding, no added branding from us.",
+    body: "We hand you the file the platform serves — no re-encoding, no added branding, only formats that really exist.",
   },
   {
     icon: Eye,
@@ -13,9 +13,9 @@ const FEATURES = [
     body: "See every photo and video in a post before downloading anything.",
   },
   {
-    icon: Layers,
-    title: "Real format choices",
-    body: "Only qualities that actually exist for that post are listed. No fake 4K buttons.",
+    icon: AudioLines,
+    title: "Video to audio",
+    body: "Turn any Instagram, TikTok or Pinterest video into an MP3, or keep the original audio as M4A.",
   },
   {
     icon: FolderDown,

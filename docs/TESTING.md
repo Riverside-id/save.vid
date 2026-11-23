@@ -28,6 +28,7 @@ Dijalankan dari mesin developer (IP residensial) terhadap postingan publik. **Be
 | Pin video Pinterest yang hanya tersedia sebagai HLS | ✅ MP4 ditemukan & diverifikasi di CDN (3,1 MB, 20,67 s = durasi pin, H.264 + AAC) |
 | Pin gambar Pinterest | ✅ file `originals` (mis. 600×1400, 533×800); crop 600×315 tidak pernah dipilih |
 | Pin Pinterest yang menyematkan Vimeo | ✅ ditolak dengan pesan jelas (tidak mengikuti ke situs lain) |
+| Video → audio | ✅ TikTok, Pinterest, Instagram → MP3 & M4A; durasi = durasi video; level suara terukur (bukan hening); reel tanpa suara → `NO_AUDIO`; folder sementara terhapus |
 | Range request (seek video) | ✅ 206 Partial Content |
 | Token dimodifikasi / hotlink lintas situs / Origin asing | ✅ ditolak (400 / 403 / 403) |
 

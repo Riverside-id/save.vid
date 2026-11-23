@@ -27,6 +27,10 @@ const FAQ = [
     a: "Videos come as MP4 and photos in their original format (usually JPG; Pinterest pins can also be PNG or GIF), at the size the platform actually provides. You can also convert a photo to PNG — that happens in your own browser.",
   },
   {
+    q: "Can I get just the audio from a video?",
+    a: "Yes. Every Instagram, TikTok or Pinterest video has “Audio only” buttons: MP3 plays everywhere, M4A keeps the original audio without re-encoding. The conversion happens on our server in a temporary folder that is deleted right away. If a video has no sound, we tell you instead of giving you an empty file.",
+  },
+  {
     q: "Do you keep a copy of what I download?",
     a: "No. Files are streamed from the platform straight to you. Nothing is written to permanent storage, and we don't keep a history of links.",
   },

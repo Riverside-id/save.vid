@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Download, FileImage, Film, Image as ImageIcon, LoaderCircle, Play, VolumeX } from "lucide-react";
+import { AudioLines, Download, FileImage, Film, Image as ImageIcon, LoaderCircle, Play, VolumeX } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { cn } from "@/components/ui/cn";
 import { mediaUrl } from "@/lib/api-client";
+import { downloadAudio, type AudioFormat } from "@/lib/audio";
 import { downloadAsPng } from "@/lib/image";
 import type { MediaItem } from "@/lib/types";
 
@@ -19,10 +20,26 @@ export function MediaItemCard({ item, total }: { item: MediaItem; total: number 
   const [variantId, setVariantId] = useState(item.variants[0]?.id ?? null);
   const [playing, setPlaying] = useState(false);
   const [pngState, setPngState] = useState<"idle" | "working" | "error">("idle");
+  const [audioState, setAudioState] = useState<{ busy: AudioFormat | null; error: string | null }>({ busy: null, error: null });
   const variant = item.variants.find((v) => v.id === variantId) ?? item.variants[0] ?? null;
   const duration = formatDuration(item.durationSeconds);
   const isVideo = item.kind === "video";
   const aspect = item.width && item.height ? `${item.width} / ${item.height}` : isVideo ? "9 / 16" : "4 / 5";
+
+  // Audio is taken from a variant that can carry sound (video-only renditions can't).
+  const audioSource = isVideo ? (item.variants.find((v) => v.hasAudio !== false) ?? null) : null;
+  const silent = isVideo && item.variants.length > 0 && item.variants.every((v) => v.hasAudio === false);
+
+  async function convertAudio(format: AudioFormat) {
+    if (!audioSource) return;
+    setAudioState({ busy: format, error: null });
+    try {
+      await downloadAudio(audioSource.token, format, audioSource.filename);
+      setAudioState({ busy: null, error: null });
+    } catch (err) {
+      setAudioState({ busy: null, error: (err as Error).message });
+    }
+  }
 
   async function convertPng() {
     if (!variant) return;
@@ -146,6 +163,37 @@ export function MediaItemCard({ item, total }: { item: MediaItem; total: number 
         ) : (
           <p className="mt-auto text-xs text-muted">Preview only — no downloadable file is available for this item.</p>
         )}
+        {audioSource ? (
+          <div className="flex flex-wrap items-center gap-2 border-t border-line pt-3">
+            <span className="mr-auto inline-flex items-center gap-1.5 text-xs font-semibold text-muted">
+              <AudioLines className="size-3.5" aria-hidden />
+              Audio only
+            </span>
+            {(["mp3", "m4a"] as const).map((f) => (
+              <Button
+                key={f}
+                variant="secondary"
+                size="sm"
+                onClick={() => convertAudio(f)}
+                disabled={audioState.busy !== null}
+                title={f === "mp3" ? "MP3 — plays everywhere" : "M4A — original audio, no re-encoding"}
+              >
+                {audioState.busy === f ? <LoaderCircle className="size-4 animate-spin" aria-hidden /> : null}
+                {audioState.busy === f ? "Converting…" : f.toUpperCase()}
+              </Button>
+            ))}
+          </div>
+        ) : silent ? (
+          <p className="flex items-center gap-1.5 border-t border-line pt-3 text-xs text-muted">
+            <VolumeX className="size-3.5" aria-hidden />
+            No audio track — nothing to extract.
+          </p>
+        ) : null}
+        {audioState.error ? (
+          <p className="text-xs text-danger" role="alert">
+            {audioState.error}
+          </p>
+        ) : null}
         {pngState === "error" ? (
           <p className="text-xs text-danger" role="alert">
             PNG conversion failed. Try the original download instead.

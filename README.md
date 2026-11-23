@@ -18,6 +18,7 @@ Tema Black & Pink · Next.js (App Router) + TypeScript + Tailwind CSS · Python 
 | Pinterest | Pin video | ✅ MP4 kualitas terbaik dengan audio |
 | Pinterest | Pin gambar | ✅ file asli ukuran penuh (bukan crop/resize) |
 | Pinterest | Pin yang menyematkan YouTube/Vimeo | ❌ tidak didukung |
+| Semua | Video → audio (MP3 / M4A) | ✅ MP3 (LAME VBR) atau M4A audio asli tanpa encode ulang |
 
 Detail & bukti: [`docs/TESTING.md`](docs/TESTING.md). Arsitektur & alasan teknis: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
@@ -32,6 +33,7 @@ Detail & bukti: [`docs/TESTING.md`](docs/TESTING.md). Arsitektur & alasan teknis
 | Resolver TikTok | `app/api/tiktok/route.ts`, `lib/server/tiktok.ts` | Node |
 | Proxy media (streaming, Range) | `app/api/media/route.ts` | Node |
 | ZIP streaming | `app/api/zip/route.ts` | Node |
+| Video → audio (ffmpeg) | `app/api/audio/route.ts`, `lib/server/audio.ts` | Node + `ffmpeg-static` |
 | Kontrak API (types) | `lib/types.ts` | — |
 
 ## Menjalankan secara lokal

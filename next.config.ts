@@ -22,6 +22,12 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // ffmpeg-static resolves its binary relative to its own folder: keep it external
+  // and make sure the binary is shipped with the audio function on Vercel.
+  serverExternalPackages: ["ffmpeg-static"],
+  outputFileTracingIncludes: {
+    "/api/audio": ["./node_modules/ffmpeg-static/ffmpeg"],
+  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

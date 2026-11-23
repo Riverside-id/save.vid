@@ -59,6 +59,14 @@ Desain (`lib/server/tiktok.ts`, `app/api/tiktok/route.ts`):
 - Tidak pernah: menyamar sebagai browser, memecahkan tantangan bot, login, atau memakai cookie pengguna. Jika TikTok mengirim tantangan bot, pengguna mendapat pesan jujur (`UPSTREAM_BLOCKED`).
 - **Watermark:** hanya sumber `bitrateInfo` / `playAddr`. `downloadAddr` tidak pernah ditawarkan — diverifikasi frame-per-frame bahwa TikTok menambahkan overlay watermark bergerak pada `downloadAddr`, sedangkan `playAddr` tidak. Logo yang merupakan bagian dari rekaman asli kreator tetap ada (kami tidak mengedit karya orang lain).
 
+## Video → audio (semua platform)
+
+- `GET /api/audio?t=<token video>&f=mp3|m4a` memakai jalur media yang sama (`openMedia`: token HMAC, allowlist, sesi TikTok, batas ukuran), jadi berlaku untuk Instagram, TikTok, dan Pinterest.
+- ffmpeg dari paket `ffmpeg-static` (`serverExternalPackages` + `outputFileTracingIncludes` agar binary ikut ter-deploy).
+- Video ditulis ke folder sementara privat (agar MP4 dengan indeks di akhir tetap bisa dibaca), dikonversi, dibaca, lalu folder **langsung dihapus**.
+- MP3: LAME VBR `-q:a 2` (± 190 kbps). M4A: trek AAC asli disalin tanpa encode ulang (fallback encode AAC bila codec tidak bisa disalin).
+- Video tanpa trek audio → `422 NO_AUDIO` dengan pesan jujur; UI tidak menampilkan tombol audio untuk video yang diketahui tanpa suara.
+
 ## Batas Vercel yang diperhitungkan
 
 | Batas | Nilai (dok. Vercel, 2026) | Penanganan |

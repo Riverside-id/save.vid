@@ -19,8 +19,8 @@ export function Hero() {
             <span className="bg-gradient-to-r from-brand to-brand-soft bg-clip-text text-transparent">Moments.</span>
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-pretty text-[15px] leading-relaxed text-muted sm:text-base">
-            Paste a link to a public post, preview what&apos;s inside, pick an available format and download the original
-            file. No sign-up, no app, nothing stored.
+            Paste a link to a public post, preview what&apos;s inside and download the original file — or just its audio as
+            MP3. No sign-up, no app, nothing stored.
           </p>
         </div>
         <div className="mt-8 sm:mt-10">
