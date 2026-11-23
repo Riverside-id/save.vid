@@ -9,8 +9,9 @@ import type { LinkDetection } from "@/lib/url";
 import { PlatformGlyph, PLATFORM_LABEL } from "./PlatformGlyph";
 
 const PLACEHOLDER: Record<Platform, string> = {
-  instagram: "Paste an Instagram or TikTok link…",
-  tiktok: "Paste a TikTok or Instagram link…",
+  instagram: "Paste an Instagram, TikTok or Pinterest link…",
+  tiktok: "Paste a TikTok, Instagram or Pinterest link…",
+  pinterest: "Paste a Pinterest, Instagram or TikTok link…",
 };
 
 /** Live badge inside the input: shows which platform the pasted link belongs to. */
@@ -77,7 +78,7 @@ export function UrlForm({
       : detection.state === "partial"
         ? { tone: "warn", text: `${PLATFORM_LABEL[detection.platform]} link detected. ${detection.message}` }
         : detection.state === "unknown"
-          ? { tone: "warn", text: "This doesn't look like an Instagram or TikTok link yet." }
+          ? { tone: "warn", text: "This doesn't look like an Instagram, TikTok or Pinterest link yet." }
           : { tone: "muted", text: hint };
 
   return (

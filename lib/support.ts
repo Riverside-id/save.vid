@@ -6,7 +6,7 @@ export type SupportStatus = "working" | "preview" | "unavailable" | "untested";
 
 export interface SupportRow {
   feature: string;
-  platform: "Instagram" | "TikTok";
+  platform: "Instagram" | "TikTok" | "Pinterest";
   status: SupportStatus;
   detail: string;
 }
@@ -21,4 +21,7 @@ export const SUPPORT_MATRIX: SupportRow[] = [
   { platform: "Instagram", feature: "Carousels + ZIP", status: "working", detail: "Every photo/video of the post, or all of them in one streamed ZIP." },
   { platform: "TikTok", feature: "Videos", status: "working", detail: "Watermark-free source — no TikTok overlay (checked frame by frame)." },
   { platform: "TikTok", feature: "Photo slideshows", status: "working", detail: "Every photo at original size, no TikTok watermark; all photos as one ZIP." },
+  { platform: "Pinterest", feature: "Video pins", status: "working", detail: "Best-quality MP4 with sound (e.g. 1080×1920); no watermark added." },
+  { platform: "Pinterest", feature: "Image pins", status: "working", detail: "The original upload at full size — never a cropped or resized copy." },
+  { platform: "Pinterest", feature: "Pins embedding other sites", status: "unavailable", detail: "Pins that only embed a YouTube/Vimeo video aren't supported." },
 ];

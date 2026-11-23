@@ -18,6 +18,19 @@ MAX_URL_LENGTH = 2048
 INSTAGRAM_HOSTS = frozenset({"instagram.com", "www.instagram.com", "m.instagram.com", "instagr.am", "www.instagr.am"})
 TIKTOK_HOSTS = frozenset({"tiktok.com", "www.tiktok.com", "m.tiktok.com"})
 TIKTOK_SHORT_HOSTS = frozenset({"vm.tiktok.com", "vt.tiktok.com"})
+PINTEREST_SHORT_HOSTS = frozenset({"pin.it"})
+# Country sites such as id.pinterest.com, pinterest.co.uk, br.pinterest.com (same list yt-dlp accepts).
+_PINTEREST_HOST_RE = re.compile(
+    r"^(?:[a-z]{2,3}\.)?pinterest\.(?:com|fr|de|ch|jp|cl|ca|it|co\.uk|nz|ru|com\.au|at|pt|co\.kr|es|com\.mx|"
+    r"dk|ph|th|com\.uy|co|nl|info|kr|ie|vn|com\.vn|ec|mx|in|pe|co\.at|hu|co\.in|co\.nz|id|com\.ec|com\.py|tw|be|uk|"
+    r"com\.bo|com\.pe)$"
+)
+_PIN_RE = re.compile(r"^/pin/(?:[A-Za-z0-9_-]+--)?(\d{5,25})(?:/[A-Za-z0-9_-]*)*/?$")
+_PIN_IT_RE = re.compile(r"^/([A-Za-z0-9]{4,20})/?$")
+
+
+def is_pinterest_host(host: str) -> bool:
+    return bool(_PINTEREST_HOST_RE.match(host))
 
 _IG_POST_RE = re.compile(r"^/(?:[A-Za-z0-9._]{1,30}/)?(p|reel|reels|tv)/([A-Za-z0-9_-]{5,64})/?$")
 _TT_ITEM_RE = re.compile(r"^/@([A-Za-z0-9._-]{1,64})/(video|photo)/(\d{6,25})/?$")
@@ -28,7 +41,7 @@ _SCHEME_RE = re.compile(r"^[a-z][a-z0-9+.-]*:", re.I)
 
 @dataclass(frozen=True)
 class ParsedUrl:
-    platform: str  # "instagram" | "tiktok"
+    platform: str  # "instagram" | "tiktok" | "pinterest"
     kind: str  # "post" | "short-link"
     canonical: str
     media_id: str  # IG shortcode, TikTok item id, or short-link code
@@ -87,7 +100,20 @@ def parse_url(raw: object) -> ParsedUrl:
             return ParsedUrl("tiktok", "short-link", f"https://{host}/{s.group(1)}/", s.group(1), "short")
         raise ResolveError("UNSUPPORTED_URL", "That TikTok short link looks incomplete.")
 
-    raise ResolveError("UNSUPPORTED_URL", "Only instagram.com and tiktok.com links are supported.")
+    if is_pinterest_host(host):
+        m = _PIN_RE.match(path)
+        if not m:
+            raise ResolveError("UNSUPPORTED_URL", "Use a link to a single Pinterest pin. Boards and profiles are not supported.")
+        pin_id = m.group(1)
+        return ParsedUrl("pinterest", "post", f"https://www.pinterest.com/pin/{pin_id}/", pin_id, "pin")
+
+    if host in PINTEREST_SHORT_HOSTS:
+        s = _PIN_IT_RE.match(path)
+        if s:
+            return ParsedUrl("pinterest", "short-link", f"https://pin.it/{s.group(1)}", s.group(1), "short")
+        raise ResolveError("UNSUPPORTED_URL", "That pin.it short link looks incomplete.")
+
+    raise ResolveError("UNSUPPORTED_URL", "Only Instagram, TikTok and Pinterest links are supported.")
 
 
 # ── Media CDN allowlist (also enforced by the Node proxy) ─────────────────
@@ -97,6 +123,7 @@ _MEDIA_HOST_SUFFIXES = (
     ".tiktokcdn.com",
     ".tiktokcdn-us.com",
     ".tiktokcdn-eu.com",
+    ".pinimg.com",
 )
 
 

@@ -14,12 +14,15 @@ describe("media host allowlist", () => {
     "https://v16-webapp-prime.tiktok.com/video/tos/x/",
     "https://v19-webapp-prime.us.tiktok.com/video/tos/x/",
     "https://www.tiktok.com/aweme/v1/play/?video_id=1",
+    "https://i.pinimg.com/originals/ec/14/55/x.jpg",
+    "https://v1.pinimg.com/videos/mc/720p/x.mp4",
   ])("allows %s", (u) => expect(isAllowedMediaUrl(u)).toBe(true));
 
   it.each([
     "http://scontent.cdninstagram.com/x.mp4",
     "https://cdninstagram.com/x.mp4",
     "https://evilcdninstagram.com/x.mp4",
+    "https://pinimg.com.evil.example/x.jpg",
     "https://scontent.cdninstagram.com.evil.example/x.mp4",
     "https://www.tiktok.com/@a/video/1",
     "https://www.tiktok.com/aweme/v1/other/",

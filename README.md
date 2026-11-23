@@ -1,6 +1,6 @@
 # Social Saver
 
-**Save Your Favorite Moments.** Website untuk menyimpan video dan foto dari postingan **publik** Instagram dan TikTok: tempel link → lihat preview → unduh file asli.
+**Save Your Favorite Moments.** Website untuk menyimpan video dan foto dari postingan **publik** Instagram, TikTok, dan Pinterest: tempel link → lihat preview → unduh file asli.
 
 Tema Black & Pink · Next.js (App Router) + TypeScript + Tailwind CSS · Python (yt-dlp) · siap di-deploy ke Vercel.
 
@@ -15,6 +15,9 @@ Tema Black & Pink · Next.js (App Router) + TypeScript + Tailwind CSS · Python 
 | Instagram | Carousel + ZIP | ✅ |
 | TikTok | Video | ✅ sumber tanpa watermark (tanpa overlay TikTok) |
 | TikTok | Slideshow foto | ✅ semua foto ukuran asli, tanpa watermark; bisa ZIP |
+| Pinterest | Pin video | ✅ MP4 kualitas terbaik dengan audio |
+| Pinterest | Pin gambar | ✅ file asli ukuran penuh (bukan crop/resize) |
+| Pinterest | Pin yang menyematkan YouTube/Vimeo | ❌ tidak didukung |
 
 Detail & bukti: [`docs/TESTING.md`](docs/TESTING.md). Arsitektur & alasan teknis: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
@@ -25,7 +28,7 @@ Detail & bukti: [`docs/TESTING.md`](docs/TESTING.md). Arsitektur & alasan teknis
 | Bagian | Lokasi | Runtime |
 |---|---|---|
 | UI | `app/`, `components/` | Next.js |
-| Resolver Instagram | `api/resolve.py`, `api/_lib/` | Vercel Python Function + yt-dlp |
+| Resolver Instagram & Pinterest | `api/resolve.py`, `api/_lib/` | Vercel Python Function + yt-dlp |
 | Resolver TikTok | `app/api/tiktok/route.ts`, `lib/server/tiktok.ts` | Node |
 | Proxy media (streaming, Range) | `app/api/media/route.ts` | Node |
 | ZIP streaming | `app/api/zip/route.ts` | Node |

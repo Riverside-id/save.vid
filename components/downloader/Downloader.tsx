@@ -20,6 +20,7 @@ type State =
 const HINTS: Record<Platform, string> = {
   instagram: "Public posts, reels, videos and carousels. Private accounts and stories are not supported.",
   tiktok: "Public TikTok videos and photo posts, from TikTok's watermark-free source.",
+  pinterest: "Public pins — video pins as MP4, image pins at their original size.",
 };
 
 export function Downloader() {

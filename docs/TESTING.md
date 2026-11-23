@@ -24,6 +24,9 @@ Dijalankan dari mesin developer (IP residensial) terhadap postingan publik. **Be
 | Konversi PNG di browser | ✅ PNG valid 1080×1350 |
 | Video TikTok | ✅ MP4 H.264 576×1024 + audio AAC, tanpa overlay watermark TikTok (dibandingkan frame-per-frame dengan versi `downloadAddr`) |
 | Slideshow foto TikTok | ✅ 6 foto ukuran asli (mis. 1082×1134, ± 2,3 MB/foto) + ZIP 6 file; diperiksa visual: tanpa logo/username TikTok. Catatan: halaman `/photo/<id>` tidak memuat data, jadi dibaca lewat `/video/<id>` |
+| Pin video Pinterest (`id.pinterest.com`) | ✅ MP4 640×1138 / 1080×1920 + audio AAC; versi asli tanpa tier bitrate dipilih (4,2 MB vs tier 1,4–3,0 MB) |
+| Pin gambar Pinterest | ✅ file `originals` (mis. 600×1400, 533×800); crop 600×315 tidak pernah dipilih |
+| Pin Pinterest yang menyematkan Vimeo | ✅ ditolak dengan pesan jelas (tidak mengikuti ke situs lain) |
 | Range request (seek video) | ✅ 206 Partial Content |
 | Token dimodifikasi / hotlink lintas situs / Origin asing | ✅ ditolak (400 / 403 / 403) |
 

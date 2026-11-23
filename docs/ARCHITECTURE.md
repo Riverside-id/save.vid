@@ -36,6 +36,14 @@ Normalisasi (`api/_lib/instagram.py`) hanya menawarkan yang benar-benar ada:
 - **Foto:** kandidat ukuran penuh saja (tanpa versi kecil). Bila Instagram tidak menyertakan ukuran, kandidat terakhir (ukuran penuh) dipakai dan diberi label *Full size* — ukuran tidak dikarang.
 - File proxy diverifikasi **identik byte-per-byte** dengan unduhan langsung dari CDN (MD5 sama).
 
+## Pinterest — yt-dlp di Python Function (sama dengan Instagram)
+
+- yt-dlp membaca pin lewat endpoint web Pinterest untuk pengunjung tanpa login (`unauth_react_main_pin`) — tanpa cookie, login, atau impersonasi. Diuji nyata dengan pin publik dari berbagai situs negara (termasuk `id.pinterest.com`).
+- Pin video: satu MP4 progresif terbaik (audio terverifikasi); HLS dilewati; di antara resolusi yang sama, file asli tanpa akhiran tier `_tN` dipilih.
+- Pin gambar: file `originals` (unggahan asli, ukuran penuh). Thumbnail berukuran kotak tetap seperti `600x315` (crop) tidak pernah dipilih.
+- Short link `pin.it` diekspansi hop demi hop (`api/_lib/redirects.py`): setiap host divalidasi allowlist + IP publik, hasil akhir harus URL pin yang valid.
+- Pin yang hanya menyematkan video YouTube/Vimeo ditolak — yt-dlp dibatasi ke ekstraktor Pinterest saja.
+
 ## TikTok — Node, satu sesi per unduhan
 
 Temuan pengujian:

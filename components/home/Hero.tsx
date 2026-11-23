@@ -12,7 +12,7 @@ export function Hero() {
         <div className="text-center">
           <p className="inline-flex items-center gap-2 rounded-full bg-white/[0.04] px-3 py-1 text-xs font-semibold text-muted ring-1 ring-line-strong">
             <span className="size-1.5 rounded-full bg-brand" aria-hidden />
-            Instagram &amp; TikTok link saver
+            Instagram · TikTok · Pinterest
           </p>
           <h1 className="mt-5 text-balance text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-6xl">
             Save Your Favorite{" "}

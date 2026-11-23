@@ -54,8 +54,18 @@ describe("detectLink (live input detection)", () => {
     ["https://www.tiktok.com/@a/video/7047596209028074758", "tiktok", "video", "TikTok video"],
     ["https://www.tiktok.com/@a/photo/7300000000000000000", "tiktok", "photo", "TikTok photo post"],
     ["https://vt.tiktok.com/ZSabc123/", "tiktok", "short-link", "TikTok short link"],
+    ["https://id.pinterest.com/pin/1084663891475263837/", "pinterest", "pin", "Pinterest pin"],
+    ["https://in.pinterest.com/pin/edamame-salad--567805465533794868/", "pinterest", "pin", "Pinterest pin"],
+    ["https://pin.it/3AbCdEf", "pinterest", "short-link", "Pinterest short link"],
   ])("recognises %s", (input, platform, type, label) => {
     expect(detectLink(input)).toMatchObject({ state: "ready", platform, type, label });
+  });
+
+  it("canonicalises Pinterest pins from any country site and rejects boards", () => {
+    const r = checkUrl("https://www.pinterest.co.uk/pin/123456789012/sent/?invite_code=x");
+    expect(r.ok && r.canonical).toBe("https://www.pinterest.com/pin/123456789012/");
+    expect(checkUrl("https://id.pinterest.com/someone/recipes/")).toMatchObject({ ok: false, reason: "unsupported-path" });
+    expect(checkUrl("https://pinterest.com.evil.example/pin/123456789/")).toMatchObject({ ok: false, reason: "unsupported-host" });
   });
 
   it("flags the platform while the link is still incomplete", () => {

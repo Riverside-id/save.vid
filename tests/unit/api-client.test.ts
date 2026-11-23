@@ -7,6 +7,7 @@ describe("api client", () => {
   it("routes platforms to their resolver", () => {
     expect(resolveEndpoint("instagram")).toBe("/api/resolve");
     expect(resolveEndpoint("tiktok")).toBe("/api/tiktok");
+    expect(resolveEndpoint("pinterest")).toBe("/api/resolve");
     expect(mediaUrl("a.b", { download: true })).toBe("/api/media?t=a.b&dl=1");
   });
 

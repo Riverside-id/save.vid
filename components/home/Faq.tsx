@@ -19,8 +19,12 @@ const FAQ = [
     a: "Yes, for public videos and photo posts. Social Saver reads the public post the same way for everyone, with an honest user agent. If TikTok answers with a bot check instead, we tell you — we never try to get around it.",
   },
   {
+    q: "Does it work with Pinterest?",
+    a: "Yes, for public pins on any Pinterest site (pinterest.com, id.pinterest.com, pin.it links…). Video pins come as MP4 with sound, image pins as the original upload at full size. Boards, profiles and pins that only embed a video from another site (like YouTube or Vimeo) aren't supported.",
+  },
+  {
     q: "Which formats can I get?",
-    a: "Videos come as MP4 and photos as JPG, in the qualities the platform actually provides for that post. You can also convert a photo to PNG — that happens in your own browser.",
+    a: "Videos come as MP4 and photos in their original format (usually JPG; Pinterest pins can also be PNG or GIF), at the size the platform actually provides. You can also convert a photo to PNG — that happens in your own browser.",
   },
   {
     q: "Do you keep a copy of what I download?",

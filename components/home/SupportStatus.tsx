@@ -27,7 +27,7 @@ export function SupportStatus() {
               return (
                 <li key={`${row.platform}-${row.feature}`} className="flex flex-col gap-2 p-4 sm:flex-row sm:items-center sm:gap-4 sm:px-6">
                   <div className="flex min-w-0 flex-1 items-center gap-3">
-                    <span className="w-20 shrink-0 text-xs font-bold uppercase tracking-wider text-muted">{row.platform}</span>
+                    <span className="w-24 shrink-0 text-xs font-bold uppercase tracking-wider text-muted">{row.platform}</span>
                     <span className="font-semibold">{row.feature}</span>
                   </div>
                   <div className="flex flex-col gap-1 sm:max-w-sm sm:items-end sm:text-right">

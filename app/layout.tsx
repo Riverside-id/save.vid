@@ -11,12 +11,12 @@ const jakarta = Plus_Jakarta_Sans({
 export const metadata: Metadata = {
   title: "Social Saver — Save Your Favorite Moments",
   description:
-    "Paste a public Instagram link, preview the media and download the original file. Respect creators: only save content you own or have permission to use.",
+    "Paste a public Instagram, TikTok or Pinterest link, preview the media and download the original file. Respect creators: only save content you own or have permission to use.",
   applicationName: "Social Saver",
   robots: { index: true, follow: true },
   openGraph: {
     title: "Social Saver",
-    description: "Save your favorite public moments from Instagram. Preview first, then download.",
+    description: "Save your favorite public moments from Instagram, TikTok and Pinterest. Preview first, then download.",
     type: "website",
   },
 };

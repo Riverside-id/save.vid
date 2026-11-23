@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import logging
 
-from . import instagram
+from . import instagram, pinterest, redirects
 from .cache import TTLCache
 from .config import load_config
 from .errors import ResolveError
 from .ratelimit import check_rate_limit, client_key
-from .urls import parse_url
+from .urls import PINTEREST_SHORT_HOSTS, is_pinterest_host, parse_url
 from .ytdlp_runner import YTDLP_VERSION, extract_info
 
 log = logging.getLogger("socialsaver")
@@ -19,6 +19,26 @@ _cache = TTLCache(max_items=256, ttl=300)
 def _extract_instagram(parsed, cfg) -> dict:
     info = extract_info(parsed.canonical, "Instagram", cfg.extract_timeout)
     return instagram.normalize(info, parsed, secret=cfg.token_secret, ttl=cfg.token_ttl, extractor_version=YTDLP_VERSION)
+
+
+def _extract_pinterest(parsed, cfg) -> dict:
+    if parsed.kind == "short-link":
+
+        def is_pin(url: str) -> bool:
+            try:
+                p = parse_url(url)
+            except ResolveError:
+                return False
+            return p.platform == "pinterest" and p.kind == "post"
+
+        final = redirects.expand(
+            parsed.canonical,
+            host_allowed=lambda h: h in PINTEREST_SHORT_HOSTS or h == "api.pinterest.com" or is_pinterest_host(h),
+            is_final=is_pin,
+        )
+        parsed = parse_url(final)
+    info = extract_info(parsed.canonical, "Pinterest", cfg.extract_timeout)
+    return pinterest.normalize(info, parsed, secret=cfg.token_secret, ttl=cfg.token_ttl, extractor_version=YTDLP_VERSION)
 
 
 def resolve(raw_url: object, client_ip: str) -> tuple[int, dict, dict]:
@@ -40,10 +60,13 @@ def resolve(raw_url: object, client_ip: str) -> tuple[int, dict, dict]:
         if cached is not None:
             return 200, cached, {"X-Cache": "HIT"}
 
-        if parsed.platform != "instagram":
+        if parsed.platform == "instagram":
+            body = _extract_instagram(parsed, cfg)
+        elif parsed.platform == "pinterest":
+            body = _extract_pinterest(parsed, cfg)
+        else:
             # TikTok is resolved by the Node route /api/tiktok (single-session reads).
             raise ResolveError("UNSUPPORTED_URL", "TikTok links are handled by /api/tiktok.")
-        body = _extract_instagram(parsed, cfg)
 
         _cache.set(cache_key, body)
         log.info("resolve ok platform=%s type=%s items=%d", body["platform"], body["postType"], len(body["items"]))

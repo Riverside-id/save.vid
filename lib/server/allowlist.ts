@@ -1,5 +1,5 @@
 /** Media CDN allowlist — mirrors `is_allowed_media_url` in api/_lib/urls.py. */
-const MEDIA_HOST_SUFFIXES = [".cdninstagram.com", ".fbcdn.net", ".tiktokcdn.com", ".tiktokcdn-us.com", ".tiktokcdn-eu.com"];
+const MEDIA_HOST_SUFFIXES = [".cdninstagram.com", ".fbcdn.net", ".tiktokcdn.com", ".tiktokcdn-us.com", ".tiktokcdn-eu.com", ".pinimg.com"];
 
 /**
  * TikTok serves web video files from hosts like v16-webapp-prime.tiktok.com,

@@ -62,16 +62,17 @@ def _options(extractor: str) -> dict:
 
 
 # Ordered: first match wins. Patterns target yt-dlp's (stable-ish) error texts.
+# "{name}" is replaced with the platform name (Instagram, Pinterest, ...).
 _ERROR_MAP: list[tuple[re.Pattern, str, str]] = [
     (
         re.compile(r"rate-limit|429|Too Many Requests", re.I),
         "UPSTREAM_BLOCKED",
-        "Instagram is temporarily limiting requests from our server. Please try again in a few minutes.",
+        "{name} is temporarily limiting requests from our server. Please try again in a few minutes.",
     ),
     (
         re.compile(r"Restricted Video|\bage[- ]?(?:restrict|gate|verif)", re.I),
         "LOGIN_REQUIRED",
-        "This post is age-restricted or gated by Instagram, so it can't be accessed without logging in.",
+        "This post is age-restricted or gated by {name}, so it can't be accessed without logging in.",
     ),
     (
         re.compile(r"login|registered users|follow this account|private", re.I),
@@ -81,21 +82,24 @@ _ERROR_MAP: list[tuple[re.Pattern, str, str]] = [
     (
         re.compile(r"empty media response|HTTP Error 404|not found|does not exist|unavailable", re.I),
         "NOT_FOUND",
-        "Instagram returned no media for this link. The post may have been deleted, made private, or be temporarily unavailable.",
+        "{name} returned no media for this link. The post may have been deleted, made private, or be temporarily unavailable.",
     ),
-    (re.compile(r"timed out|timeout", re.I), "TIMEOUT", "Instagram took too long to respond. Please try again."),
+    (re.compile(r"timed out|timeout", re.I), "TIMEOUT", "{name} took too long to respond. Please try again."),
     (
-        re.compile(r"Unsupported URL", re.I),
+        re.compile(r"Unsupported URL|vimeo|youtube", re.I),
         "UNSUPPORTED_URL",
-        "This link isn't a supported post.",
+        "This post embeds a video hosted on another site, which Social Saver doesn't support.",
     ),
 ]
 
+_NAMES = {"Instagram": "Instagram", "Pinterest": "Pinterest"}
 
-def map_ytdlp_error(message: str) -> ResolveError:
+
+def map_ytdlp_error(message: str, extractor: str = "Instagram") -> ResolveError:
+    name = _NAMES.get(extractor, "The platform")
     for pattern, code, friendly in _ERROR_MAP:
         if pattern.search(message or ""):
-            return ResolveError(code, friendly)
+            return ResolveError(code, friendly.format(name=name))
     return ResolveError("UPSTREAM_ERROR", "The platform returned an unexpected response. Please try again later.")
 
 
@@ -115,7 +119,7 @@ def extract_info(url: str, extractor: str, timeout: float) -> dict:
         future.cancel()
         raise ResolveError("TIMEOUT", "The platform took too long to respond. Please try again.") from None
     except (DownloadError, ExtractorError) as err:
-        raise map_ytdlp_error(str(err)) from None
+        raise map_ytdlp_error(str(err), extractor) from None
     if not isinstance(info, dict):
         raise ResolveError("NO_MEDIA", "No media was found in this post.")
     return info

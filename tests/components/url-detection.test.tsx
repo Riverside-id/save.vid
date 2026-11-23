@@ -26,12 +26,20 @@ describe("URL field platform detection", () => {
     expect(screen.getByRole("tab", { name: /TikTok/ }).getAttribute("aria-selected")).toBe("true");
   });
 
+  it("detects a Pinterest pin from id.pinterest.com and switches the tab", () => {
+    render(<Downloader />);
+    type("https://id.pinterest.com/pin/1084663891475263837/");
+    expect(screen.getByTestId("link-detection").dataset.platform).toBe("pinterest");
+    expect(screen.getByText(/Pinterest pin detected/)).toBeTruthy();
+    expect(screen.getByRole("tab", { name: /Pinterest/ }).getAttribute("aria-selected")).toBe("true");
+  });
+
   it("warns about incomplete or foreign links without a badge", () => {
     render(<Downloader />);
     type("https://www.tiktok.com/@creator");
     expect(screen.getByText(/TikTok link detected\. Use a link to a single TikTok video or photo post\./)).toBeTruthy();
     type("https://example.com/video");
     expect(screen.queryByTestId("link-detection")).toBeNull();
-    expect(screen.getByText(/doesn't look like an Instagram or TikTok link/)).toBeTruthy();
+    expect(screen.getByText(/doesn't look like an Instagram, TikTok or Pinterest link/)).toBeTruthy();
   });
 });

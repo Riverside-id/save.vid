@@ -6,7 +6,7 @@ function failure(code: ClientErrorCode, message: string, retryAfterSeconds?: num
   return { ok: false, error: { code: code as ErrorCode, message, ...(retryAfterSeconds ? { retryAfterSeconds } : {}) } };
 }
 
-/** Instagram → Python resolver (yt-dlp); TikTok → Node resolver. */
+/** Instagram & Pinterest → Python resolver (yt-dlp); TikTok → Node resolver. */
 export function resolveEndpoint(platform: Platform): string {
   return platform === "tiktok" ? "/api/tiktok" : "/api/resolve";
 }

@@ -18,6 +18,12 @@ const INSTAGRAM_HOSTS = new Set([
 
 const TIKTOK_HOSTS = new Set(["tiktok.com", "www.tiktok.com", "m.tiktok.com"]);
 const TIKTOK_SHORT_HOSTS = new Set(["vm.tiktok.com", "vt.tiktok.com"]);
+const PINTEREST_SHORT_HOSTS = new Set(["pin.it"]);
+/** Country sites such as id.pinterest.com, br.pinterest.com, pinterest.co.uk (mirrors api/_lib/urls.py). */
+const PINTEREST_HOST_RE =
+  /^(?:[a-z]{2,3}\.)?pinterest\.(?:com|fr|de|ch|jp|cl|ca|it|co\.uk|nz|ru|com\.au|at|pt|co\.kr|es|com\.mx|dk|ph|th|com\.uy|co|nl|info|kr|ie|vn|com\.vn|ec|mx|in|pe|co\.at|hu|co\.in|co\.nz|id|com\.ec|com\.py|tw|be|uk|com\.bo|com\.pe)$/;
+const PIN_RE = /^\/pin\/(?:[A-Za-z0-9_-]+--)?(\d{5,25})(?:\/[A-Za-z0-9_-]*)*\/?$/;
+const PIN_IT_RE = /^\/([A-Za-z0-9]{4,20})\/?$/;
 
 const IG_SHORTCODE = "[A-Za-z0-9_-]{5,64}";
 const IG_POST_RE = new RegExp(`^/(?:[A-Za-z0-9._]{1,30}/)?(p|reel|reels|tv)/(${IG_SHORTCODE})/?$`);
@@ -25,7 +31,7 @@ const TT_ITEM_RE = /^\/@([A-Za-z0-9._-]{1,64})\/(video|photo)\/(\d{6,25})\/?$/;
 const TT_SHORT_RE = /^\/(?:t\/)?([A-Za-z0-9]{5,20})\/?$/;
 
 /** What the link points to, as far as the URL alone can tell. */
-export type LinkType = "reel" | "post" | "video" | "photo" | "short-link";
+export type LinkType = "reel" | "post" | "video" | "photo" | "pin" | "short-link";
 
 export type UrlCheck =
   | { ok: true; platform: Platform; kind: "post" | "short-link"; type: LinkType; canonical: string }
@@ -37,6 +43,7 @@ export function detectPlatform(input: string): Platform | null {
   const host = parsed.hostname.toLowerCase();
   if (INSTAGRAM_HOSTS.has(host)) return "instagram";
   if (TIKTOK_HOSTS.has(host) || TIKTOK_SHORT_HOSTS.has(host)) return "tiktok";
+  if (PINTEREST_HOST_RE.test(host) || PINTEREST_SHORT_HOSTS.has(host)) return "pinterest";
   return null;
 }
 
@@ -54,7 +61,7 @@ function parseLoose(input: string): URL | null {
 
 export function checkUrl(input: string): UrlCheck {
   const trimmed = input.trim();
-  if (!trimmed) return { ok: false, reason: "empty", message: "Paste a link to an Instagram or TikTok post." };
+  if (!trimmed) return { ok: false, reason: "empty", message: "Paste a link to an Instagram, TikTok or Pinterest post." };
   if (trimmed.length > MAX_URL_LENGTH) return { ok: false, reason: "too-long", message: "That link is too long." };
 
   const url = parseLoose(trimmed);
@@ -108,12 +115,27 @@ export function checkUrl(input: string): UrlCheck {
     return { ok: false, reason: "unsupported-path", message: "That TikTok short link looks incomplete." };
   }
 
-  return { ok: false, reason: "unsupported-host", message: "Only instagram.com and tiktok.com links are supported." };
+  if (PINTEREST_HOST_RE.test(host)) {
+    const m = PIN_RE.exec(path);
+    if (!m) {
+      return { ok: false, reason: "unsupported-path", message: "Use a link to a single Pinterest pin. Boards and profiles are not supported." };
+    }
+    return { ok: true, platform: "pinterest", kind: "post", type: "pin", canonical: `https://www.pinterest.com/pin/${m[1]}/` };
+  }
+
+  if (PINTEREST_SHORT_HOSTS.has(host)) {
+    const s = PIN_IT_RE.exec(path);
+    if (s) return { ok: true, platform: "pinterest", kind: "short-link", type: "short-link", canonical: `https://pin.it/${s[1]}` };
+    return { ok: false, reason: "unsupported-path", message: "That pin.it short link looks incomplete." };
+  }
+
+  return { ok: false, reason: "unsupported-host", message: "Only Instagram, TikTok and Pinterest links are supported." };
 }
 
 const LINK_LABEL: Record<Platform, Record<LinkType, string>> = {
-  instagram: { reel: "Instagram Reel", post: "Instagram post", video: "Instagram video", photo: "Instagram photo", "short-link": "Instagram link" },
-  tiktok: { reel: "TikTok video", post: "TikTok post", video: "TikTok video", photo: "TikTok photo post", "short-link": "TikTok short link" },
+  instagram: { reel: "Instagram Reel", post: "Instagram post", video: "Instagram video", photo: "Instagram photo", pin: "Instagram post", "short-link": "Instagram link" },
+  tiktok: { reel: "TikTok video", post: "TikTok post", video: "TikTok video", photo: "TikTok photo post", pin: "TikTok post", "short-link": "TikTok short link" },
+  pinterest: { reel: "Pinterest pin", post: "Pinterest pin", video: "Pinterest pin", photo: "Pinterest pin", pin: "Pinterest pin", "short-link": "Pinterest short link" },
 };
 
 export type LinkDetection =

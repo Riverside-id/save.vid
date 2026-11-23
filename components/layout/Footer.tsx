@@ -13,7 +13,7 @@ export function Footer() {
         </div>
         <div className="text-sm leading-relaxed text-muted md:text-right">
           <p>No accounts. No cookies stored. No media kept on our servers.</p>
-          <p className="mt-2">Social Saver is not affiliated with, endorsed by, or sponsored by Instagram, Meta or TikTok.</p>
+          <p className="mt-2">Social Saver is not affiliated with, endorsed by, or sponsored by Instagram, Meta, TikTok or Pinterest.</p>
         </div>
       </div>
       <div className="border-t border-line">

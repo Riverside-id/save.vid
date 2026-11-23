@@ -126,7 +126,7 @@ export function MediaItemCard({ item, total }: { item: MediaItem; total: number 
               <Download className="size-4" aria-hidden />
               Download {variant.ext.toUpperCase()}
             </ButtonLink>
-            {!isVideo ? (
+            {!isVideo && variant.ext !== "gif" ? (
               <Button
                 variant="secondary"
                 size="sm"

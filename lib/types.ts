@@ -3,7 +3,7 @@
  * resolver (`api/resolve.py`). Keep in sync with `api/_lib/models.py`.
  */
 
-export type Platform = "instagram" | "tiktok";
+export type Platform = "instagram" | "tiktok" | "pinterest";
 
 export type MediaKind = "video" | "image";
 
@@ -14,7 +14,7 @@ export interface MediaVariant {
   id: string;
   /** Human label, e.g. "MP4 · 720×1280". */
   label: string;
-  ext: "mp4" | "jpg" | "webp" | "png";
+  ext: "mp4" | "jpg" | "webp" | "png" | "gif";
   mime: string;
   width: number | null;
   height: number | null;
