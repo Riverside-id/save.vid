@@ -1,0 +1,4 @@
+# Runtime dependencies for the Vercel Python Function (api/resolve.py).
+# Pin exact versions; bump yt-dlp regularly — platforms change often.
+# NOTE: curl_cffi is intentionally NOT installed (no browser impersonation).
+yt-dlp==2026.10.26

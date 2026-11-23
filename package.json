@@ -1,0 +1,50 @@
+{
+  "name": "social-saver",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Social Saver — save public Instagram media you have the right to keep. Next.js + Python (yt-dlp) on Vercel.",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=20.9"
+  },
+  "scripts": {
+    "setup": "node scripts/setup-env.mjs",
+    "dev": "concurrently -k -n web,py -c magenta,cyan \"next dev\" \"npm:dev:py\"",
+    "dev:web": "next dev",
+    "dev:py": "node scripts/run-python.mjs scripts/dev_python_api.py",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:py": "node scripts/run-python.mjs -m pytest -q tests_py",
+    "test:all": "npm run test && npm run test:py",
+    "test:live": "node scripts/live-check.mjs",
+    "check": "npm run lint && npm run typecheck && npm run test:all && npm run build"
+  },
+  "dependencies": {
+    "client-zip": "^2.5.1",
+    "lucide-react": "^1.78.0",
+    "next": "^16.4.6",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.5",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/react": "^16.3.3",
+    "@types/node": "^24.19.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.3.0",
+    "concurrently": "^10.0.7",
+    "eslint": "^10.15.0",
+    "eslint-config-next": "^16.4.6",
+    "fflate": "^0.8.2",
+    "jsdom": "^31.0.1",
+    "tailwindcss": "^4.3.5",
+    "typescript": "^6.0.3",
+    "vitest": "^5.1.1"
+  }
+}
